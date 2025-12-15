@@ -1615,6 +1615,8 @@
                 const hintGenerators = [];
             
                 // 1) 좌표축 위 지뢰 관련 힌트
+                //    - 좌표축 위 지뢰의 x좌표/y좌표는 0이다.
+                //    - 좌표축 위 지뢰의 x좌표와 y좌표의 차는 ?이다.
                 hintGenerators.push(() => {
                     const list = [];
                     if (axisMines.length === 0) return list;
@@ -1627,6 +1629,7 @@
                 });
             
                 // 2) 정비례 그래프가 지나는 사분면 힌트
+                //    - 지뢰가 있는 정비례 관계 그래프는 제?사분면을 지난다.
                 hintGenerators.push(() => {
                     const list = [];
                     if (state.stage2K === null || propMines.length === 0) return list;
@@ -1646,6 +1649,7 @@
                 });
             
                 // 3) 반비례 그래프가 지나는 사분면 힌트
+                //    - 지뢰가 있는 반비례 관계 그래프는 제?사분면을 지난다.
                 hintGenerators.push(() => {
                     const list = [];
                     if (state.stage2KInv === null || invMines.length === 0) return list;
@@ -1666,6 +1670,7 @@
                 });
             
                 // 4) 정비례 그래프 위의 "지뢰가 아닌" 격자점 힌트
+                //    - 지뢰가 있는 정비례 관계 그래프는 점 (?,?)을 지난다.
                 hintGenerators.push(() => {
                     const list = [];
                     if (state.stage2K === null || propMines.length === 0) return list;
@@ -1684,6 +1689,7 @@
                 });
             
                 // 5) 반비례 그래프 위의 "지뢰가 아닌" 격자점 힌트
+                //    - 지뢰가 있는 반비례 관계 그래프는 점 (?,?)을 지난다.
                 hintGenerators.push(() => {
                     const list = [];
                     if (state.stage2KInv === null || invMines.length === 0) return list;
@@ -1702,28 +1708,7 @@
                     return list;
                 });
             
-                // 6) 기본적인 "위치 관계" 힌트 (사분면/부호 등)
-                hintGenerators.push(() => {
-                    const list = [];
-                    const hasPosX = mines.some(([x]) => x > 0);
-                    const hasNegX = mines.some(([x]) => x < 0);
-                    const hasZeroX = mines.some(([x]) => x === 0);
-                    const hasPosY = mines.some(([, y]) => y > 0);
-                    const hasNegY = mines.some(([, y]) => y < 0);
-                    const hasZeroY = mines.some(([, y]) => y === 0);
-                    if (hasPosX) list.push('아직 찾지 못한 지뢰는 x가 양수인 곳에 있습니다.');
-                    if (hasNegX) list.push('아직 찾지 못한 지뢰는 x가 음수인 곳에 있습니다.');
-                    if (hasZeroX) list.push('아직 찾지 못한 지뢰는 x가 0인 곳에 있습니다.');
-                    if (hasPosY) list.push('아직 찾지 못한 지뢰는 y가 양수인 곳에 있습니다.');
-                    if (hasNegY) list.push('아직 찾지 못한 지뢰는 y가 음수인 곳에 있습니다.');
-                    if (hasZeroY) list.push('아직 찾지 못한 지뢰는 y가 0인 곳에 있습니다.');
-                    return list;
-                });
-            
-                // 7) 완전 기본 힌트
-                hintGenerators.push(() => {
-                    return ['아직 찾지 못한 지뢰는 -5~5 범위의 격자점에 있습니다.'];
-                });
+                // 위 5가지 타입의 힌트만 사용하도록 제한
             
                 // 제너레이터 순서를 무작위로 섞어서 "힌트 종류" 자체를 랜덤하게 선택
                 for (let i = hintGenerators.length - 1; i > 0; i--) {
