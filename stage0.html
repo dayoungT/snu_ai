@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>좌표평면 지뢰 게임</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            border-radius: 0 0 16px 16px;
+        }
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.35);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .header-title::before {
+            content: '💣';
+            font-size: 36px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .header-author {
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            font-weight: 400;
+            margin-top: 4px;
+        }
+        .container {
+            max-width: 520px;
+            width: 100%;
+            margin-top: 140px;
+            background: rgba(255,255,255,0.96);
+            padding: 32px;
+            border-radius: 18px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 18px;
+            font-size: 17px;
+            border: 2px solid #e6e6f0;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            background: #fff;
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+        button {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+        }
+        button:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 10px 22px rgba(102, 126, 234, 0.45);
+        }
+        button:active { transform: translateY(-1px); }
+        .confirm-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: #fff;
+            padding: 30px 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            border: 3px solid #667eea;
+            z-index: 1500;
+            animation: popupAppear 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            color: #333;
+            max-width: 520px;
+            width: 90%;
+            text-align: center;
+        }
+        @keyframes popupAppear {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        .confirm-popup h2 {
+            color: #667eea;
+            margin-bottom: 16px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .confirm-popup p {
+            margin: 12px 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .confirm-popup .info-item {
+            background: #f8f9ff;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: left;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+        }
+        .confirm-popup .info-item strong {
+            color: #667eea;
+        }
+        .confirm-popup button {
+            margin-top: 14px;
+            padding: 12px 20px;
+            font-size: 17px;
+            border-radius: 10px;
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+        }
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.65);
+            z-index: 1400;
+        }
+        @media (max-width: 768px) {
+            .container {
+                margin-top: 120px;
+                padding: 26px 20px;
+            }
+            .header-title { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">좌표평면 지뢰 게임</div>
+        <div class="header-author">made by 신서중 정다영🩷</div>
+    </div>
+    
+    <div class="container">
+        <div class="form-group">
+            <label for="studentId">
+                <span>🎓</span>
+                <span>학번</span>
+            </label>
+            <input type="text" id="studentId" placeholder="학번을 입력하세요 ✨">
+        </div>
+        
+        <div class="form-group">
+            <label for="studentName">
+                <span>👤</span>
+                <span>이름</span>
+            </label>
+            <input type="text" id="studentName" placeholder="이름을 입력하세요 ✨">
+        </div>
+        
+        <button id="confirmBtn">확인 ✅</button>
+    </div>
+    
+    <script>
+        (function() {
+            const studentIdInput = document.getElementById('studentId');
+            const studentNameInput = document.getElementById('studentName');
+            const confirmBtn = document.getElementById('confirmBtn');
+            
+            // 확인 버튼 클릭 이벤트
+            confirmBtn.addEventListener('click', () => {
+                const studentId = studentIdInput.value.trim();
+                const studentName = studentNameInput.value.trim();
+                
+                // 입력값 검증
+                if (!studentId || !studentName) {
+                    alert('학번과 이름을 모두 입력해주세요.');
+                    return;
+                }
+                
+                // 확인 팝업 표시
+                showConfirmPopup(studentId, studentName);
+            });
+            
+            // Enter 키로도 확인 가능
+            studentIdInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    studentNameInput.focus();
+                }
+            });
+            
+            studentNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    confirmBtn.click();
+                }
+            });
+            
+            // 확인 팝업 표시 함수
+            function showConfirmPopup(studentId, studentName) {
+                // 오버레이 생성
+                const overlay = document.createElement('div');
+                overlay.className = 'popup-overlay';
+                
+                // 팝업 생성
+                const popup = document.createElement('div');
+                popup.className = 'confirm-popup';
+                
+                const title = document.createElement('h2');
+                title.textContent = '입력 정보 확인';
+                
+                const message = document.createElement('p');
+                message.textContent = '입력한 정보가 맞나요?';
+                
+                const idInfo = document.createElement('div');
+                idInfo.className = 'info-item';
+                const idLabel = document.createElement('strong');
+                idLabel.textContent = '학번: ';
+                idInfo.appendChild(idLabel);
+                idInfo.appendChild(document.createTextNode(studentId));
+                
+                const nameInfo = document.createElement('div');
+                nameInfo.className = 'info-item';
+                const nameLabel = document.createElement('strong');
+                nameLabel.textContent = '이름: ';
+                nameInfo.appendChild(nameLabel);
+                nameInfo.appendChild(document.createTextNode(studentName));
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = 'display: flex; gap: 10px; justify-content: center; margin-top: 20px;';
+                
+                const confirmButton = document.createElement('button');
+                confirmButton.textContent = '확인';
+                confirmButton.style.cssText = 'flex: 1; padding: 12px 30px; font-size: 18px; background: #28a745;';
+                confirmButton.addEventListener('click', () => {
+                    // localStorage에 학번과 이름 저장
+                    localStorage.setItem('game_studentId', studentId);
+                    localStorage.setItem('game_studentName', studentName);
+                    // stage1.html로 이동
+                    window.location.href = 'stage1.html';
+                });
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = '취소';
+                cancelButton.style.cssText = 'flex: 1; padding: 12px 30px; font-size: 18px; background: #6c757d;';
+                cancelButton.addEventListener('click', () => {
+                    overlay.remove();
+                    popup.remove();
+                });
+                
+                buttonContainer.appendChild(confirmButton);
+                buttonContainer.appendChild(cancelButton);
+                
+                popup.appendChild(title);
+                popup.appendChild(message);
+                popup.appendChild(idInfo);
+                popup.appendChild(nameInfo);
+                popup.appendChild(buttonContainer);
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(popup);
+            }
+        })();
+    </script>
+</body>
+</html>
+

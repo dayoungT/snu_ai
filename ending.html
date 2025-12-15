@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>좌표평면 지뢰 게임 - 활동 정리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .header-title::before {
+            content: '💣';
+            font-size: 36px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .header-author {
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+        }
+        .container {
+            max-width: 960px;
+            margin: 30px auto;
+        }
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .card p.desc {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+        .question {
+            background: linear-gradient(135deg, #f8f9ff 0%, #fff5f8 100%);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+        .question:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        .question label {
+            font-weight: 500;
+            color: #333;
+            line-height: 1.6;
+            font-size: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .question-number {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 2px solid #e8e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 14px;
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #fff;
+            line-height: 1.6;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea::placeholder {
+            color: #bbb;
+        }
+        .submit-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        button {
+            padding: 14px 36px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(-1px);
+        }
+        .error-msg {
+            color: #dc3545;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+            padding: 12px;
+            background: #fff5f5;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+        }
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .popup {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+            border: 3px solid #667eea;
+        }
+        .popup h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+        .popup p {
+            margin-bottom: 18px;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+        .popup button {
+            width: 100%;
+            background: #667eea;
+        }
+        @media (max-width: 600px) {
+            .card { padding: 18px; }
+            textarea { min-height: 90px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">좌표평면 지뢰 게임</div>
+        <div class="header-author">made by 신서중 정다영🩷</div>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>활동 정리</h2>
+            <p class="desc">아래 문항에 답하며 오늘의 활동을 정리해봅시다.</p>
+            <form id="summaryForm">
+                <div class="question">
+                    <label for="q1">
+                        <span class="question-number">✏️</span>
+                        <span>정비례 관계 그래프 위에 있는 한 지뢰에 대해 다음과 같은 힌트가 주어졌다. "이 그래프는 제1사분면과 제3사분면을 지나고 점 (1,2)를 지난다." 이 힌트를 바탕으로 지뢰의 위치를 찾는 과정을 설명해봅시다.</span>
+                    </label>
+                    <textarea id="q1" placeholder="답변을 입력해주세요... ✨" required></textarea>
+                </div>
+                <div class="question">
+                    <label for="q2">
+                        <span class="question-number">✏️</span>
+                        <span>반비례 관계 그래프 위에 있는 한 지뢰에 대해 다음과 같은 힌트가 주어졌다. "이 그래프는 제2사분면과 제4사분면을 지나고 점 (-2,3)을 지난다." 이 힌트를 바탕으로 지뢰의 위치를 찾는 과정을 설명해봅시다.</span>
+                    </label>
+                    <textarea id="q2" placeholder="답변을 입력해주세요... ✨" required></textarea>
+                </div>
+                <div class="question">
+                    <label for="q3">
+                        <span class="question-number">✏️</span>
+                        <span>게임 속 지뢰의 위치를 찾을 때, 힌트(좌표의 합 또는 차, 그래프, 지나는 점 등)를 어떤 순서로 해결하면 가장 효율적인지 자신만의 전략을 적어봅시다.</span>
+                    </label>
+                    <textarea id="q3" placeholder="답변을 입력해주세요... ✨" required></textarea>
+                </div>
+                <div class="question">
+                    <label for="q4">
+                        <span class="question-number">✏️</span>
+                        <span>좌표평면 지뢰 게임을 하면서 궁금했거나 헷갈렸던 내용이 있다면 적어봅시다.</span>
+                    </label>
+                    <textarea id="q4" placeholder="답변을 입력해주세요... ✨" required></textarea>
+                </div>
+                <div class="error-msg" id="errorMsg">⚠️ 모든 문항을 작성해 주세요.</div>
+                <div class="submit-container">
+                    <button type="submit">제출하기 🚀</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const form = document.getElementById('summaryForm');
+            const errorMsg = document.getElementById('errorMsg');
+
+            function showPopup(message) {
+                const overlay = document.createElement('div');
+                overlay.className = 'popup-overlay';
+
+                const popup = document.createElement('div');
+                popup.className = 'popup';
+
+                const title = document.createElement('h3');
+                title.textContent = '제출 완료';
+
+                const msg = document.createElement('p');
+                msg.style.textAlign = 'center';
+                msg.innerHTML = '제출 완료!<br>나도 이제 좌표평면과 그래프 마스터👑';
+
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = '확인';
+                closeBtn.addEventListener('click', () => {
+                    overlay.remove();
+                });
+
+                popup.appendChild(title);
+                popup.appendChild(msg);
+                popup.appendChild(closeBtn);
+                overlay.appendChild(popup);
+                document.body.appendChild(overlay);
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const answers = [
+                    document.getElementById('q1').value.trim(),
+                    document.getElementById('q2').value.trim(),
+                    document.getElementById('q3').value.trim(),
+                    document.getElementById('q4').value.trim()
+                ];
+
+                const allFilled = answers.every(v => v !== '');
+                if (!allFilled) {
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                errorMsg.style.display = 'none';
+                
+                // Google Forms에 데이터 제출
+                submitToGoogleForms(answers);
+                
+                showPopup();
+                form.reset();
+            });
+            
+            // Google Forms에 데이터 제출 함수 (숨겨진 폼을 사용, CORS 문제 회피)
+            function submitToGoogleForms(answers) {
+                // localStorage에서 모든 데이터 가져오기
+                const studentId = localStorage.getItem('game_studentId') || '';
+                const studentName = localStorage.getItem('game_studentName') || '';
+                const stage1Score = localStorage.getItem('game_stage1_score') || '0';
+                const stage2Score = localStorage.getItem('game_stage2_score') || '0';
+                const stage3Score = localStorage.getItem('game_stage3_score') || '0';
+                
+                // Google Forms URL
+                const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScW7O0cE8S-cxpTXi0kreVj1XQrpF0MEA1cVuZHHqkgPBSOwA/formResponse';
+                
+                // 숨겨진 폼 생성 (새 탭으로 제출)
+                const formEl = document.createElement('form');
+                formEl.action = formUrl;
+                formEl.method = 'POST';
+                formEl.target = '_blank';
+                formEl.style.display = 'none';
+                
+                function appendField(name, value) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = value;
+                    formEl.appendChild(input);
+                }
+                
+                appendField('entry.230871741', studentId);      // 학번
+                appendField('entry.897825788', studentName);    // 이름
+                appendField('entry.1618353204', stage1Score);   // stage1 점수
+                appendField('entry.1493540889', stage2Score);   // stage2 점수
+                appendField('entry.532165052', stage3Score);    // stage3 점수
+                appendField('entry.182313047', answers[0]);     // 문항1
+                appendField('entry.57997632', answers[1]);      // 문항2
+                appendField('entry.2003539898', answers[2]);    // 문항3
+                appendField('entry.483077398', answers[3]);     // 문항4
+                
+                document.body.appendChild(formEl);
+                formEl.submit();
+                document.body.removeChild(formEl);
+            }
+        })();
+    </script>
+</body>
+</html>
+
