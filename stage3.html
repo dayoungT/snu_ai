@@ -1367,7 +1367,7 @@
                         if (isInt(y) && y >= GRID_MIN && y <= GRID_MAX) {
                             // 원점 (0,0) 제외
                             if (x !== 0 || y !== 0) {
-                                propCandidates.push([x, y]);
+                            propCandidates.push([x, y]);
                             }
                         }
                     }
@@ -1384,9 +1384,9 @@
                         if (isInt(y) && y >= GRID_MIN && y <= GRID_MAX) {
                             // 원점 (0,0) 제외 (x === 0이면 이미 제외되지만 명시적으로 체크)
                             if (x !== 0 || y !== 0) {
-                                const key = toKey(x, y);
-                                if (!state.mines.has(key)) {
-                                    invCandidates.push([x, y]);
+                            const key = toKey(x, y);
+                            if (!state.mines.has(key)) {
+                                invCandidates.push([x, y]);
                                 }
                             }
                         }
@@ -1821,7 +1821,7 @@
                 const axisMines = [];
                 
                 if (state.stage2K !== null) {
-                    mines.forEach(([x, y]) => {
+                mines.forEach(([x, y]) => {
                         // 정비례 그래프 위인지 확인: y = kx
                         if (Math.abs(y - state.stage2K * x) < 0.001) {
                             propMines.push([x, y]);
@@ -1854,14 +1854,14 @@
                         const axisXZeroHint = '좌표축 위 지뢰의 x좌표는 0이다.';
                         if (axisXZeroHint !== excludeHint && !state.shownHints.has(axisXZeroHint)) {
                             hints.push(axisXZeroHint);
-                        }
                     }
+                }
                     if (ay === 0) {
                         const axisYZeroHint = '좌표축 위 지뢰의 y좌표는 0이다.';
                         if (axisYZeroHint !== excludeHint && !state.shownHints.has(axisYZeroHint)) {
                             hints.push(axisYZeroHint);
-                        }
                     }
+                }
                     
                     // x, y 좌표 차(절댓값)에 대한 힌트
                     const axisDiff = Math.abs(ax - ay);
@@ -1882,13 +1882,13 @@
                             else if (x < 0 && y > 0) quadrants.add(2);
                             else if (x < 0 && y < 0) quadrants.add(3);
                             else if (x > 0 && y < 0) quadrants.add(4);
-                        }
                     }
+                }
                     quadrants.forEach(quad => {
                         const hint = `지뢰가 있는 정비례 관계의 그래프는 제${quad}사분면을 지난다.`;
                         if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                            hints.push(hint);
-                        }
+                        hints.push(hint);
+                    }
                     });
                 }
                 
@@ -1908,8 +1908,8 @@
                     quadrants.forEach(quad => {
                         const hint = `지뢰가 있는 반비례 관계의 그래프는 제${quad}사분면을 지난다.`;
                         if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                            hints.push(hint);
-                        }
+                        hints.push(hint);
+                    }
                     });
                 }
                 
@@ -1935,8 +1935,8 @@
                         const [px, py] = nonMinePoints[Math.floor(Math.random() * nonMinePoints.length)];
                         const hint = `지뢰가 있는 정비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
                         if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                            hints.push(hint);
-                        }
+                        hints.push(hint);
+                    }
                     }
                 }
                 
@@ -1957,8 +1957,8 @@
                         const [px, py] = nonMinePoints[Math.floor(Math.random() * nonMinePoints.length)];
                         const hint = `지뢰가 있는 반비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
                         if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                            hints.push(hint);
-                        }
+                        hints.push(hint);
+                    }
                     }
                 }
                 
@@ -1975,7 +1975,7 @@
                 const availableHints = hints.filter(h => !state.shownHints.has(h));
                 if (availableHints.length > 0) {
                     return availableHints[Math.floor(Math.random() * availableHints.length)];
-                }
+                    }
                 return hints[Math.floor(Math.random() * hints.length)];
             }
             
@@ -2227,7 +2227,7 @@
                     line.setAttribute('fill', 'none');
                     line.setAttribute('opacity', '0.6');
                     elements.lines.appendChild(line);
-                }
+                        }
                 
                 // 시도 횟수 증가 (힌트 표시를 위해)
                 state.tries++;
@@ -2251,7 +2251,7 @@
                     line.setAttribute('fill', 'none');
                     line.setAttribute('opacity', '0.6');
                     elements.lines.appendChild(line);
-                }
+                        }
                 
                 // 시도 횟수 증가 (힌트 표시를 위해)
                 state.tries++;
@@ -2597,8 +2597,8 @@
                     // 3단계 완료
                     title.style.textAlign = 'center';
                     title.appendChild(document.createTextNode('🌟3단계 성공!🌟'));
-                    const br1 = document.createElement('br');
-                    title.appendChild(br1);
+                        const br1 = document.createElement('br');
+                        title.appendChild(br1);
                     title.appendChild(document.createTextNode('모든 단계를 완료했습니다‼️'));
                     
                     const triesP = document.createElement('p');
@@ -2626,7 +2626,7 @@
                     summaryBtn.style.cssText = 'padding: 12px 30px; font-size: 18px; background: #28a745; color: white;';
                     summaryBtn.addEventListener('click', () => {
                         window.location.href = 'ending.html';
-                    });
+                        });
                     buttonContainer.appendChild(summaryBtn);
                     
                     const restartBtn = document.createElement('button');
