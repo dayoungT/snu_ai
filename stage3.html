@@ -1576,407 +1576,180 @@
             // 힌트 생성 함수
             function generateHint(excludeHint = null) {
                 if (state.mines.size === 0) return '';
-                
-                // state.mines에서 직접 지뢰 좌표 가져오기
+            
+                // 현재 남아있는 지뢰 좌표만 사용
                 const mines = [];
                 state.mines.forEach(key => {
                     const [x, y] = fromKey(key);
                     mines.push([x, y]);
                 });
-                
-                // 1단계 특별 힌트 - 사용 안 함
-                if (false) {
-                    const hints = [];
-                    
-                    // 축 위 지뢰 힌트
-                    const axisMines = mines.filter(([x, y]) => x === 0 || y === 0);
-                    if (axisMines.length > 0) {
-                        const hint = '축 위에 지뢰가 1개 있습니다.';
-                        if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                            hints.push(hint);
-                        }
-                    }
-                    
-                    // 모든 지뢰에 대해
-                    mines.forEach(([x, y]) => {
-                        // x좌표 힌트
-                        const hintX = `x좌표가 ${x}인 지뢰가 있습니다.`;
-                        if (hintX !== excludeHint) {
-                            hints.push(hintX);
-                        }
-                        
-                        // y좌표 힌트
-                        const hintY = `y좌표가 ${y}인 지뢰가 있습니다.`;
-                        if (hintY !== excludeHint) {
-                            hints.push(hintY);
-                        }
-                    });
-                    
-                    // 축 위에 없는 지뢰들
-                    const offAxisMines = mines.filter(([x, y]) => x !== 0 && y !== 0);
-                    if (offAxisMines.length > 0) {
-                        offAxisMines.forEach(([x, y]) => {
-                            // x + y 힌트
-                            const sum = x + y;
-                            const hint = `x좌표와 y좌표의 합이 ${sum}인 지뢰가 있습니다.`;
-                            if (hint !== excludeHint) {
-                                hints.push(hint);
-                            }
-                            
-                            // x - y 힌트 (절댓값)
-                            const diff = Math.abs(x - y);
-                            const hint2 = `x좌표와 y좌표의 차가 ${diff}인 지뢰가 있습니다.`;
-                            if (hint2 !== excludeHint) {
-                                hints.push(hint2);
-                            }
-                            
-                            // x / y 비율 힌트 (정수인 경우만)
-                            if (y !== 0 && x % y === 0) {
-                                const ratio = x / y;
-                                const hint3 = ratio === 1 
-                                    ? `x좌표와 y좌표의 값이 같은 지뢰가 있습니다.`
-                                    : `x좌표는 y좌표의 ${ratio}배인 지뢰가 있습니다.`;
-                                if (hint3 !== excludeHint) {
-                                    hints.push(hint3);
-                                }
-                            } else if (x !== 0 && y % x === 0) {
-                                const ratio = y / x;
-                                const hint3 = ratio === 1 
-                                    ? `x좌표와 y좌표의 값이 같은 지뢰가 있습니다.`
-                                    : `y좌표는 x좌표의 ${ratio}배인 지뢰가 있습니다.`;
-                                if (hint3 !== excludeHint) {
-                                    hints.push(hint3);
-                                }
-                            }
-                            
-                            // 절댓값 힌트
-                            const absX = Math.abs(x);
-                            const absY = Math.abs(y);
-                            if (absX === absY) {
-                                const hint4 = `x좌표와 y좌표의 절댓값이 같은 지뢰가 있습니다.`;
-                                if (hint4 !== excludeHint) {
-                                    hints.push(hint4);
-                                }
-                            }
-                        });
-                    }
-                    
-                    if (hints.length === 0) {
-                        const defaultHint = '아직 찾지 못한 지뢰는 -5~5 범위의 격자점에 있습니다.';
-                        return defaultHint !== excludeHint ? defaultHint : '';
-                    }
-                    
-                    return hints[Math.floor(Math.random() * hints.length)];
-                }
-                
-                // 2단계 특별 힌트 - 사용 안 함
-                if (false) {
-                    const hints = [];
-                    
-                    // 첫 번째 힌트
-                    if (!state.firstHintShown) {
-                        const firstHint = '하나의 정비례 관계 그래프 위에 지뢰가 2개, 하나의 반비례 그래프 위에 지뢰가 2개 있다.';
-                        if (firstHint !== excludeHint) {
-                            state.firstHintShown = true;
-                            return firstHint;
-                        }
-                    }
-                    
-                    // 정비례 그래프 위 지뢰 찾기
-                    const propMines = [];
-                    const invMines = [];
-                    
-                    if (state.stage2K !== null) {
-                        mines.forEach(([x, y]) => {
-                            // 정비례 그래프 위인지 확인: y = kx
-                            if (Math.abs(y - state.stage2K * x) < 0.001) {
-                                propMines.push([x, y]);
-                            }
-                        });
-                    }
-                    
-                    if (state.stage2KInv !== null) {
-                        mines.forEach(([x, y]) => {
-                            // 반비례 그래프 위인지 확인: y = k/x
-                            if (x !== 0 && Math.abs(y - state.stage2KInv / x) < 0.001) {
-                                invMines.push([x, y]);
-                            }
-                        });
-                    }
-                    
-                    // 정비례 그래프 위 지뢰 힌트
-                    if (propMines.length > 0) {
-                        propMines.forEach(([x, y]) => {
-                            // x좌표 힌트
-                            const hintX = `정비례 관계 그래프 위 지뢰의 x좌표는 ${x}이다.`;
-                            if (hintX !== excludeHint) {
-                                hints.push(hintX);
-                            }
-                            
-                            // y좌표 힌트
-                            const hintY = `정비례 관계 그래프 위 지뢰의 y좌표는 ${y}이다.`;
-                            if (hintY !== excludeHint) {
-                                hints.push(hintY);
-                            }
-                            
-                            // 합 힌트
-                            const sum = x + y;
-                            const hintSum = `정비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 합은 ${sum}이다.`;
-                            if (hintSum !== excludeHint) {
-                                hints.push(hintSum);
-                            }
-                            
-                            // 차 힌트
-                            const diff = Math.abs(x - y);
-                            const hintDiff = `정비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 차는 ${diff}이다.`;
-                            if (hintDiff !== excludeHint) {
-                                hints.push(hintDiff);
-                            }
-                            
-                            // 배수 힌트
-                            if (y !== 0 && x % y === 0) {
-                                const ratio = x / y;
-                                const hintRatio = ratio === 1 
-                                    ? `정비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 값이 같다.`
-                                    : `정비례 관계 그래프 위 지뢰의 x좌표는 y좌표의 ${ratio}배이다.`;
-                                if (hintRatio !== excludeHint) {
-                                    hints.push(hintRatio);
-                                }
-                            } else if (x !== 0 && y % x === 0) {
-                                const ratio = y / x;
-                                const hintRatio = ratio === 1 
-                                    ? `정비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 값이 같다.`
-                                    : `정비례 관계 그래프 위 지뢰의 y좌표는 x좌표의 ${ratio}배이다.`;
-                                if (hintRatio !== excludeHint) {
-                                    hints.push(hintRatio);
-                                }
-                            }
-                        });
-                    }
-                    
-                    // 반비례 그래프 위 지뢰 힌트
-                    if (invMines.length > 0) {
-                        invMines.forEach(([x, y]) => {
-                            // x좌표 힌트
-                            const hintX = `반비례 관계 그래프 위 지뢰의 x좌표는 ${x}이다.`;
-                            if (hintX !== excludeHint) {
-                                hints.push(hintX);
-                            }
-                            
-                            // y좌표 힌트
-                            const hintY = `반비례 관계 그래프 위 지뢰의 y좌표는 ${y}이다.`;
-                            if (hintY !== excludeHint) {
-                                hints.push(hintY);
-                            }
-                            
-                            // 합 힌트
-                            const sum = x + y;
-                            const hintSum = `반비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 합은 ${sum}이다.`;
-                            if (hintSum !== excludeHint) {
-                                hints.push(hintSum);
-                            }
-                            
-                            // 차 힌트
-                            const diff = Math.abs(x - y);
-                            const hintDiff = `반비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 차는 ${diff}이다.`;
-                            if (hintDiff !== excludeHint) {
-                                hints.push(hintDiff);
-                            }
-                            
-                            // 배수 힌트
-                            if (y !== 0 && x % y === 0) {
-                                const ratio = x / y;
-                                const hintRatio = ratio === 1 
-                                    ? `반비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 값이 같다.`
-                                    : `반비례 관계 그래프 위 지뢰의 x좌표는 y좌표의 ${ratio}배이다.`;
-                                if (hintRatio !== excludeHint) {
-                                    hints.push(hintRatio);
-                                }
-                            } else if (x !== 0 && y % x === 0) {
-                                const ratio = y / x;
-                                const hintRatio = ratio === 1 
-                                    ? `반비례 관계 그래프 위 지뢰의 x좌표와 y좌표의 값이 같다.`
-                                    : `반비례 관계 그래프 위 지뢰의 y좌표는 x좌표의 ${ratio}배이다.`;
-                                if (hintRatio !== excludeHint) {
-                                    hints.push(hintRatio);
-                                }
-                            }
-                        });
-                    }
-                    
-                    if (hints.length === 0) {
-                        const defaultHint = '아직 찾지 못한 지뢰는 -5~5 범위의 격자점에 있습니다.';
-                        return defaultHint !== excludeHint ? defaultHint : '';
-                    }
-                    
-                    return hints[Math.floor(Math.random() * hints.length)];
-                }
-                
-                // 3단계 힌트 (stage1과 stage2 힌트 통합)
-                const hints = [];
-                
-                // 정비례 그래프 위 지뢰 찾기
+            
+                // 정비례 / 반비례 / 축 위 지뢰 분류
                 const propMines = [];
                 const invMines = [];
                 const axisMines = [];
-                
+            
                 if (state.stage2K !== null) {
-                mines.forEach(([x, y]) => {
-                        // 정비례 그래프 위인지 확인: y = kx
+                    mines.forEach(([x, y]) => {
                         if (Math.abs(y - state.stage2K * x) < 0.001) {
                             propMines.push([x, y]);
                         }
                     });
                 }
-                
                 if (state.stage2KInv !== null) {
                     mines.forEach(([x, y]) => {
-                        // 반비례 그래프 위인지 확인: y = k/x
                         if (x !== 0 && Math.abs(y - state.stage2KInv / x) < 0.001) {
                             invMines.push([x, y]);
                         }
                     });
                 }
-                
-                // 축 위 지뢰 찾기
                 mines.forEach(([x, y]) => {
-                    if (x === 0 || y === 0) {
-                        axisMines.push([x, y]);
-                    }
+                    if (x === 0 || y === 0) axisMines.push([x, y]);
                 });
-                
-                // 1. 좌표축 위 지뢰에 대한 힌트
-                if (axisMines.length > 0) {
-                    const [ax, ay] = axisMines[0];
-                    
-                    // x 또는 y가 0이라는 힌트
-                    if (ax === 0) {
-                        const axisXZeroHint = '좌표축 위 지뢰의 x좌표는 0이다.';
-                        if (axisXZeroHint !== excludeHint && !state.shownHints.has(axisXZeroHint)) {
-                            hints.push(axisXZeroHint);
-                    }
-                }
-                    if (ay === 0) {
-                        const axisYZeroHint = '좌표축 위 지뢰의 y좌표는 0이다.';
-                        if (axisYZeroHint !== excludeHint && !state.shownHints.has(axisYZeroHint)) {
-                            hints.push(axisYZeroHint);
-                    }
-                }
-                    
-                    // x, y 좌표 차(절댓값)에 대한 힌트
-                    const axisDiff = Math.abs(ax - ay);
-                    const axisDiffHint = `좌표축 위 지뢰의 x좌표와 y좌표의 차는 ${axisDiff}이다.`;
-                    if (axisDiffHint !== excludeHint && !state.shownHints.has(axisDiffHint)) {
-                        hints.push(axisDiffHint);
-                    }
-                }
-                
-                // 2. 정비례/반비례 그래프 사분면 힌트 (stage2 형식)
-                // 정비례 그래프 y = kx가 지나는 사분면
-                if (state.stage2K !== null && propMines.length > 0) {
-                    const quadrants = new Set();
-                    for (let x = GRID_MIN; x <= GRID_MAX; x++) {
-                        const y = state.stage2K * x;
-                        if (y >= GRID_MIN && y <= GRID_MAX) {
-                            if (x > 0 && y > 0) quadrants.add(1);
-                            else if (x < 0 && y > 0) quadrants.add(2);
-                            else if (x < 0 && y < 0) quadrants.add(3);
-                            else if (x > 0 && y < 0) quadrants.add(4);
-                    }
-                }
-                    quadrants.forEach(quad => {
-                        const hint = `지뢰가 있는 정비례 관계의 그래프는 제${quad}사분면을 지난다.`;
-                        if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                        hints.push(hint);
-                    }
-                    });
-                }
-                
-                // 반비례 그래프 y = k/x가 지나는 사분면
-                if (state.stage2KInv !== null && invMines.length > 0) {
-                    const quadrants = new Set();
-                    for (let x = GRID_MIN; x <= GRID_MAX; x++) {
-                        if (x === 0) continue;
-                        const y = state.stage2KInv / x;
-                        if (y >= GRID_MIN && y <= GRID_MAX) {
-                            if (x > 0 && y > 0) quadrants.add(1);
-                            else if (x < 0 && y > 0) quadrants.add(2);
-                            else if (x < 0 && y < 0) quadrants.add(3);
-                            else if (x > 0 && y < 0) quadrants.add(4);
-                        }
-                    }
-                    quadrants.forEach(quad => {
-                        const hint = `지뢰가 있는 반비례 관계의 그래프는 제${quad}사분면을 지난다.`;
-                        if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                        hints.push(hint);
-                    }
-                    });
-                }
-                
-                // 3. 정비례 그래프 위 정수점 힌트 (지뢰가 아닌 점)
-                // (stage2 형식: 지뢰가 있는 정비례 관계의 그래프는 점 (?,?)을 지난다.)
-                // 모든 지뢰 + 이미 찾은 지뢰를 합쳐서 지뢰가 아닌 점을 찾는다.
+            
+                // 지뢰가 아닌 정비례/반비례 그래프 위 격자점 찾기 (중복 힌트 방지용)
                 const allMinesSet = new Set();
                 mines.forEach(([x, y]) => allMinesSet.add(toKey(x, y)));
                 state.hits.forEach(key => allMinesSet.add(key));
-                
-                if (state.stage2K !== null && propMines.length > 0) {
-                    const nonMinePoints = [];
+            
+                const hintGenerators = [];
+            
+                // 1) 좌표축 위 지뢰 관련 힌트
+                hintGenerators.push(() => {
+                    const list = [];
+                    if (axisMines.length === 0) return list;
+                    const [ax, ay] = axisMines[0];
+                    if (ax === 0) list.push('좌표축 위 지뢰의 x좌표는 0이다.');
+                    if (ay === 0) list.push('좌표축 위 지뢰의 y좌표는 0이다.');
+                    const diff = Math.abs(ax - ay);
+                    list.push(`좌표축 위 지뢰의 x좌표와 y좌표의 차는 ${diff}이다.`);
+                    return list;
+                });
+            
+                // 2) 정비례 그래프가 지나는 사분면 힌트
+                hintGenerators.push(() => {
+                    const list = [];
+                    if (state.stage2K === null || propMines.length === 0) return list;
+                    const quadrants = new Set();
                     for (let x = GRID_MIN; x <= GRID_MAX; x++) {
                         const y = state.stage2K * x;
-                        if (isInt(y) && y >= GRID_MIN && y <= GRID_MAX) {
-                            const key = toKey(x, y);
-                            if (!allMinesSet.has(key)) {
-                                nonMinePoints.push([x, y]);
-                            }
-                        }
+                        if (y < GRID_MIN || y > GRID_MAX) continue;
+                        if (x > 0 && y > 0) quadrants.add(1);
+                        else if (x < 0 && y > 0) quadrants.add(2);
+                        else if (x < 0 && y < 0) quadrants.add(3);
+                        else if (x > 0 && y < 0) quadrants.add(4);
                     }
-                    if (nonMinePoints.length > 0) {
-                        const [px, py] = nonMinePoints[Math.floor(Math.random() * nonMinePoints.length)];
-                        const hint = `지뢰가 있는 정비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
-                        if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                        hints.push(hint);
-                    }
-                    }
-                }
-                
-                // 4. 반비례 그래프 위 정수점 힌트 (지뢰가 아닌 점)
-                if (state.stage2KInv !== null && invMines.length > 0) {
-                    const nonMinePoints = [];
+                    quadrants.forEach(q => {
+                        list.push(`지뢰가 있는 정비례 관계의 그래프는 제${q}사분면을 지난다.`);
+                    });
+                    return list;
+                });
+            
+                // 3) 반비례 그래프가 지나는 사분면 힌트
+                hintGenerators.push(() => {
+                    const list = [];
+                    if (state.stage2KInv === null || invMines.length === 0) return list;
+                    const quadrants = new Set();
                     for (let x = GRID_MIN; x <= GRID_MAX; x++) {
                         if (x === 0) continue;
                         const y = state.stage2KInv / x;
-                        if (isInt(y) && y >= GRID_MIN && y <= GRID_MAX) {
-                            const key = toKey(x, y);
-                            if (!allMinesSet.has(key)) {
-                                nonMinePoints.push([x, y]);
-                            }
-                        }
+                        if (y < GRID_MIN || y > GRID_MAX) continue;
+                        if (x > 0 && y > 0) quadrants.add(1);
+                        else if (x < 0 && y > 0) quadrants.add(2);
+                        else if (x < 0 && y < 0) quadrants.add(3);
+                        else if (x > 0 && y < 0) quadrants.add(4);
                     }
-                    if (nonMinePoints.length > 0) {
-                        const [px, py] = nonMinePoints[Math.floor(Math.random() * nonMinePoints.length)];
-                        const hint = `지뢰가 있는 반비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
-                        if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                        hints.push(hint);
+                    quadrants.forEach(q => {
+                        list.push(`지뢰가 있는 반비례 관계의 그래프는 제${q}사분면을 지난다.`);
+                    });
+                    return list;
+                });
+            
+                // 4) 정비례 그래프 위의 "지뢰가 아닌" 격자점 힌트
+                hintGenerators.push(() => {
+                    const list = [];
+                    if (state.stage2K === null || propMines.length === 0) return list;
+                    const candidates = [];
+                    for (let x = GRID_MIN; x <= GRID_MAX; x++) {
+                        const y = state.stage2K * x;
+                        if (!isInt(y) || y < GRID_MIN || y > GRID_MAX) continue;
+                        const key = toKey(x, y);
+                        if (!allMinesSet.has(key)) candidates.push([x, y]);
                     }
+                    if (candidates.length === 0) return list;
+                    candidates.forEach(([px, py]) => {
+                        list.push(`지뢰가 있는 정비례 관계의 그래프는 점 (${px},${py})을 지난다.`);
+                    });
+                    return list;
+                });
+            
+                // 5) 반비례 그래프 위의 "지뢰가 아닌" 격자점 힌트
+                hintGenerators.push(() => {
+                    const list = [];
+                    if (state.stage2KInv === null || invMines.length === 0) return list;
+                    const candidates = [];
+                    for (let x = GRID_MIN; x <= GRID_MAX; x++) {
+                        if (x === 0) continue;
+                        const y = state.stage2KInv / x;
+                        if (!isInt(y) || y < GRID_MIN || y > GRID_MAX) continue;
+                        const key = toKey(x, y);
+                        if (!allMinesSet.has(key)) candidates.push([x, y]);
                     }
+                    if (candidates.length === 0) return list;
+                    candidates.forEach(([px, py]) => {
+                        list.push(`지뢰가 있는 반비례 관계의 그래프는 점 (${px},${py})을 지난다.`);
+                    });
+                    return list;
+                });
+            
+                // 6) 기본적인 "위치 관계" 힌트 (사분면/부호 등)
+                hintGenerators.push(() => {
+                    const list = [];
+                    const hasPosX = mines.some(([x]) => x > 0);
+                    const hasNegX = mines.some(([x]) => x < 0);
+                    const hasZeroX = mines.some(([x]) => x === 0);
+                    const hasPosY = mines.some(([, y]) => y > 0);
+                    const hasNegY = mines.some(([, y]) => y < 0);
+                    const hasZeroY = mines.some(([, y]) => y === 0);
+                    if (hasPosX) list.push('아직 찾지 못한 지뢰는 x가 양수인 곳에 있습니다.');
+                    if (hasNegX) list.push('아직 찾지 못한 지뢰는 x가 음수인 곳에 있습니다.');
+                    if (hasZeroX) list.push('아직 찾지 못한 지뢰는 x가 0인 곳에 있습니다.');
+                    if (hasPosY) list.push('아직 찾지 못한 지뢰는 y가 양수인 곳에 있습니다.');
+                    if (hasNegY) list.push('아직 찾지 못한 지뢰는 y가 음수인 곳에 있습니다.');
+                    if (hasZeroY) list.push('아직 찾지 못한 지뢰는 y가 0인 곳에 있습니다.');
+                    return list;
+                });
+            
+                // 7) 완전 기본 힌트
+                hintGenerators.push(() => {
+                    return ['아직 찾지 못한 지뢰는 -5~5 범위의 격자점에 있습니다.'];
+                });
+            
+                // 제너레이터 순서를 무작위로 섞어서 "힌트 종류" 자체를 랜덤하게 선택
+                for (let i = hintGenerators.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [hintGenerators[i], hintGenerators[j]] = [hintGenerators[j], hintGenerators[i]];
                 }
-                
-                if (hints.length === 0) {
-                    // 다른 힌트가 없으면 기본 힌트 반환 (현재 힌트와 다르면)
-                    const defaultHint = '아직 찾지 못한 지뢰는 -5~5 범위의 격자점에 있습니다.';
-                    if (defaultHint !== excludeHint && !state.shownHints.has(defaultHint)) {
-                        return defaultHint;
-                    }
+            
+                // 모든 타입에서 후보 힌트 수집
+                const candidates = [];
+                hintGenerators.forEach(gen => {
+                    gen().forEach(h => {
+                        if (!h) return;
+                        if (h === excludeHint) return;
+                        if (state.shownHints.has(h)) return; // 이미 나온 힌트는 제외
+                        if (!isHintValid(h)) return;        // 현재 남아있는 지뢰와 맞지 않으면 제외
+                        candidates.push(h);
+                    });
+                });
+            
+                if (candidates.length === 0) {
                     return '';
                 }
-                
-                // 중복되지 않은 힌트 중 랜덤 선택
-                const availableHints = hints.filter(h => !state.shownHints.has(h));
-                if (availableHints.length > 0) {
-                    return availableHints[Math.floor(Math.random() * availableHints.length)];
-                    }
-                return hints[Math.floor(Math.random() * hints.length)];
+            
+                // 후보 중에서 하나를 랜덤 선택
+                const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+                return chosen;
             }
             
             // 힌트 팝업 표시

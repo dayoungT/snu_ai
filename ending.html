@@ -312,11 +312,17 @@
                 // Google Forms URL
                 const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScW7O0cE8S-cxpTXi0kreVj1XQrpF0MEA1cVuZHHqkgPBSOwA/formResponse';
                 
-                // 숨겨진 폼 생성 (새 탭으로 제출)
+                // 응답이 보이지 않도록 숨겨진 iframe 생성
+                const iframe = document.createElement('iframe');
+                iframe.name = 'googleFormSubmitFrame';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                // 숨겨진 폼 생성 (숨겨진 iframe으로 제출)
                 const formEl = document.createElement('form');
                 formEl.action = formUrl;
                 formEl.method = 'POST';
-                formEl.target = '_blank';
+                formEl.target = 'googleFormSubmitFrame';
                 formEl.style.display = 'none';
                 
                 function appendField(name, value) {
@@ -339,7 +345,16 @@
                 
                 document.body.appendChild(formEl);
                 formEl.submit();
-                document.body.removeChild(formEl);
+                
+                // 잠시 뒤에 정리
+                setTimeout(() => {
+                    if (formEl.parentNode) {
+                        formEl.parentNode.removeChild(formEl);
+                    }
+                    if (iframe.parentNode) {
+                        iframe.parentNode.removeChild(iframe);
+                    }
+                }, 1000);
             }
         })();
     </script>
