@@ -1771,13 +1771,17 @@
                             }
                             }
                             
-                        // 지뢰가 아닌 점 중 하나를 랜덤하게 선택
+                        // 지뢰가 아닌 점들을 힌트 후보로 여러 개 추가 (중복 힌트 방지 & 다양성 확보)
+                        // - 가능한 한 다양한 점이 나오도록 전체 후보를 넣고, 아래에서 아직 안 나온 힌트만 랜덤 선택
                         if (nonMinePoints.length > 0) {
-                            const [px, py] = nonMinePoints[Math.floor(Math.random() * nonMinePoints.length)];
-                            const hint = `지뢰가 있는 정비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
-                            if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                                hints.push(hint);
-                            }
+                            // 섞어서 후보 다양성 확보
+                            const shuffled = nonMinePoints.sort(() => Math.random() - 0.5);
+                            shuffled.forEach(([px, py]) => {
+                                const hint = `지뢰가 있는 정비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
+                                if (hint !== excludeHint && !state.shownHints.has(hint)) {
+                                    hints.push(hint);
+                                }
+                            });
                         }
                             }
                             
@@ -1796,14 +1800,16 @@
                             }
                         }
                         
-                        // 지뢰가 아닌 점 중 하나를 랜덤하게 선택
+                        // 지뢰가 아닌 점들을 힌트 후보로 여러 개 추가 (중복 힌트 방지 & 다양성 확보)
                         if (nonMinePoints.length > 0) {
-                            const [px, py] = nonMinePoints[Math.floor(Math.random() * nonMinePoints.length)];
-                            const hint = `지뢰가 있는 반비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
-                            if (hint !== excludeHint && !state.shownHints.has(hint)) {
-                                hints.push(hint);
+                            const shuffled = nonMinePoints.sort(() => Math.random() - 0.5);
+                            shuffled.forEach(([px, py]) => {
+                                const hint = `지뢰가 있는 반비례 관계의 그래프는 점 (${px},${py})을 지난다.`;
+                                if (hint !== excludeHint && !state.shownHints.has(hint)) {
+                                    hints.push(hint);
                                 }
-                            }
+                            });
+                        }
                     }
                     
                     if (hints.length === 0) {
@@ -1811,11 +1817,8 @@
                         return '';
                     }
                     
-                    // 중복되지 않은 힌트 중 랜덤 선택
-                    const availableHints = hints.filter(h => !state.shownHints.has(h));
-                    if (availableHints.length > 0) {
-                        return availableHints[Math.floor(Math.random() * availableHints.length)];
-                    }
+                    // 이미 나온 힌트는 절대 제공하지 않음: 남은 후보 중에서만 랜덤 선택
+                    // (위에서 이미 shownHints를 제외하고 push 했기 때문에, 여기서는 hints만 보면 됨)
                     return hints[Math.floor(Math.random() * hints.length)];
                 }
                 
